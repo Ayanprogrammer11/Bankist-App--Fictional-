@@ -73,7 +73,9 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 0;
     return null;
   }
-  labelWelcome.textContent = `Welcome back, ${user.owner.split(' ').join(' ')}`;
+  inputLoginPin.value = '';
+  inputLoginUsername.value = '';
+  labelWelcome.textContent = `Welcome back, ${user.owner.split(' ')[0]}`;
   updateUI();
   containerApp.style.opacity = 1;
   inputLoginPin.blur();
@@ -82,16 +84,19 @@ btnLogin.addEventListener('click', function (e) {
 // Transfer Money Functionality
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
-  // 1. Select Elements
+  //  Select Elements
   const toRecipient = inputTransferTo.value;
   const amount = Number(inputTransferAmount.value);
-  // 2. Adding Negative Movement to current user
+
+  // Check if the recipient is current user
+  if (toRecipient === user.username) return null;
+  //  Adding Negative Movement to current user
   user.movements.push(-amount);
 
-  // 3. Add positive movement to recipient
+  //  Add positive movement to recipient
   const recipient = accounts.find(acc => acc.username === toRecipient);
   recipient && recipient.movements.push(amount);
-  // 4. Update UI
+  //  Update UI
   updateUI();
 });
 
@@ -114,17 +119,22 @@ btnLoan.addEventListener('click', function (e) {
 // Deleting Account Functionality
 btnClose.addEventListener('click', function (e) {
   e.preventDefault();
-  // 1. Selecting Elements
+  //  Selecting Elements
   const username = inputCloseUsername.value;
   const pin = Number(inputClosePin.value);
-  // 2. Correct Credentials?
+
+  // Limiting users to delete only the account they are currently logged in
+  if (username !== user.username) return null;
+
+  // Correct Credentials?
   if (user.username === username && user.pin === pin)
     accounts.splice(
       accounts.findIndex(acc => acc.username === username),
       1
     );
   else return null;
-  //3. Hide UI
+
+  // Hide UI
   containerApp.style.opacity = 0;
 });
 
