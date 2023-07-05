@@ -52,6 +52,7 @@ const btnTransfer = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
 const btnClose = document.querySelector('.form__btn--close');
 const btnSort = document.querySelector('.btn--sort');
+const btnSaveSession = document.querySelector('.save-session');
 
 const inputLoginUsername = document.querySelector('.login__input--user');
 const inputLoginPin = document.querySelector('.login__input--pin');
@@ -62,21 +63,27 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 let user;
-
+let userMovCopy;
 // Login Functionality
 btnLogin.addEventListener('click', function (e) {
+  // Preventing the form from submitting
   e.preventDefault();
+  // Selecting inputted Username and Pin
   const username = inputLoginUsername.value;
   const pin = Number(inputLoginPin.value);
+  // Find account if it doesnt exist then exit execution of this callback function.
   user = accounts.find(acc => acc.username === username && acc.pin === pin);
   if (!user) {
     containerApp.style.opacity = 0;
     return null;
   }
+  userMovCopy = [...user.movements];
+  // Clearing Input Fields, and displaying welcome message
   inputLoginPin.value = '';
   inputLoginUsername.value = '';
   labelWelcome.textContent = `Welcome back, ${user.owner.split(' ')[0]}`;
-  updateUI();
+  // Updating Interface and removing focus from input fields.
+  updateUI(user);
   containerApp.style.opacity = 1;
   inputLoginPin.blur();
 });
@@ -85,19 +92,18 @@ btnLogin.addEventListener('click', function (e) {
 btnTransfer.addEventListener('click', function (e) {
   e.preventDefault();
   //  Select Elements
-  const toRecipient = inputTransferTo.value;
+  const toRecipient = accounts.find(acc => acc.username === inputTransferTo.value);
   const amount = Number(inputTransferAmount.value);
 
-  // Check if the recipient is current user
-  if (toRecipient === user.username) return null;
-  //  Adding Negative Movement to current user
-  user.movements.push(-amount);
-
-  //  Add positive movement to recipient
-  const recipient = accounts.find(acc => acc.username === toRecipient);
-  recipient && recipient.movements.push(amount);
-  //  Update UI
-  updateUI();
+  inputTransferTo.value = inputTransferAmount.value = '';
+  if (user.balance >= amount && toRecipient && amount > 0 && user?.username !== toRecipient?.username) {
+    console.log('valid transfer');
+    // Doing the transfer
+    user.movements.push(-amount);
+    toRecipient.movements.push(amount);
+    // Updating the UI
+    updateUI(user);
+  }
 });
 
 // Loan Functionality
@@ -106,14 +112,16 @@ btnLoan.addEventListener('click', function (e) {
   // 1. Selecting Elements
   const loan = Number(inputLoanAmount.value);
   // 2. Any deposit > 10% of loan?
-  const check = user.movements
-    .filter(mov => mov > 0)
-    .find(mov => mov > (10 / 100) * loan);
-  if (!check) return null;
-  // 3. Add Positive Movement to current user
-  user.movements.push(loan);
-  // 4. Update the UI
-  updateUI();
+  const check = user.movements.some(mov => mov > 0 && mov >= loan * 0.1);
+
+  if (check) {
+    // 3. Add Positive Movement to current user
+    user.movements.push(loan);
+    // 4. Update the UI
+    updateUI(user);
+  }
+  // 5. Clearing Input Fields
+  inputLoanAmount.value = '';
 });
 
 // Deleting Account Functionality
@@ -122,26 +130,22 @@ btnClose.addEventListener('click', function (e) {
   //  Selecting Elements
   const username = inputCloseUsername.value;
   const pin = Number(inputClosePin.value);
-
-  // Limiting users to delete only the account they are currently logged in
-  if (username !== user.username) return null;
+  const index = accounts.findIndex(acc => acc.username === username);
 
   // Correct Credentials?
-  if (user.username === username && user.pin === pin)
-    accounts.splice(
-      accounts.findIndex(acc => acc.username === username),
-      1
-    );
-  else return null;
-
-  // Hide UI
-  containerApp.style.opacity = 0;
+  if (user.username === username && user.pin === pin && username === user.username) {
+    accounts.splice(index, 1);
+    // Hide UI
+    containerApp.style.opacity = 0;
+    // Clear Inputs
+    inputCloseUsername.value = inputClosePin.value = '';
+  }
 });
 
-const updateUI = function () {
-  displayMovements(user.movements);
-  calcDisplayBalance(user.movements);
-  calcDisplaySummary(user.movements);
+const updateUI = function (acc) {
+  displayMovements(acc.movements);
+  calcDisplayBalance(acc);
+  calcDisplaySummary(acc);
 };
 
 const displayMovements = function (movements) {
@@ -151,9 +155,7 @@ const displayMovements = function (movements) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
-          <div class="movements__type movements__type--${type}">${
-      i + 1
-    } ${type}</div>
+          <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
           <div class="movements__value">${mov}€</div>
         </div>
     `;
@@ -161,34 +163,28 @@ const displayMovements = function (movements) {
   });
 };
 
-displayMovements(account1.movements);
-
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
+const calcDisplayBalance = function (acc) {
+  const balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  acc.balance = balance;
   labelBalance.textContent = `${balance}€`;
 };
 
-calcDisplayBalance(account1.movements);
-
-const calcDisplaySummary = function (movements) {
-  const incomes = movements
-    .filter(mov => mov > 0)
-    .reduce((acc, mov) => acc + mov, 0);
+const calcDisplaySummary = function ({ movements, interestRate }) {
+  const incomes = movements.filter(mov => mov > 0).reduce((acc, mov) => acc + mov, 0);
   labelSumIn.textContent = `${incomes}€`;
-  const out = movements
-    .filter(mov => mov < 0)
-    .reduce((acc, mov) => acc + mov, 0);
+
+  const out = movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov, 0);
   labelSumOut.textContent = `${Math.abs(out)}€`;
 
   const interest = movements
     .filter(mov => mov > 0)
-    .map(interest => (interest * 1.2) / 100)
+    .map(interest => (interest * interestRate) / 100)
     .filter(interest => interest >= 1)
     .reduce((acc, interest) => acc + interest, 0);
-  labelSumInterest.textContent = `${interest}€`;
-};
 
-calcDisplaySummary(account1.movements);
+  labelSumInterest.textContent = `${interest}€`;
+  return { incomes, out, interest };
+};
 
 const createUsernames = function (accs) {
   accs.forEach(function (acc) {
@@ -442,3 +438,107 @@ console.log(withdrawals);
 
 // const firstWithdrawal = movements.find(mov => mov < 0);
 // console.log(firstWithdrawal);
+/*
+const checkSame = arr => {
+  let same = false;
+  for (let i = 0; i < arr.length; i++) {
+    if (i !== 0) {
+      if (arr[i] === arr[i - 1]) same = true;
+      else same = false;
+    }
+  }
+  return same;
+};
+
+console.log(checkSame([5, 5, 5]));
+
+*/
+
+// The Some and Every Methods
+
+// It checks for the exact equality in each item of an array
+// console.log(movements, movements.includes(-130));
+
+// // But the 'some' method is more useful when we need to specify a condition
+// // The 'some' method takes the same arguments as in forEach, map, filter etc.. (NOT reduce). On each iteration if atleast one of the specified returned condition in the callback function matches the current item of array in an iteration then it returns true
+// const anyDeposits = movements.some(mov => mov > 1500);
+// console.log(anyDeposits);
+
+// Every does the opposite it returns true if all elements in an array matches the returned condition.
+
+// Flat and FlatMAP
+
+// The Flat method simply flattens an array which contains array, so to spread out all value.
+
+// const arr = [[1, 2, 3, 4], [5, 6, 7, 8], 9, 10];
+// console.log(arr.flat());
+
+// const flattenArray = arr => {
+//   let result = [];
+//   const loopArr = arr => {
+//     for (let i = 0; i < arr.length; i++) result.push(arr[i]);
+//   };
+//   for (let i = 0; i < arr.length; i++) {
+//     if (Array.isArray(arr[i])) loopArr(arr[i]);
+//     else result.push(arr[i]);
+//   }
+//   return result;
+// };
+
+// console.log(flattenArray(arr));
+
+// const accountMovements = accounts.map(acc => acc.movements);
+
+// console.log(accountMovements.flat());
+// const balance = accountMovements.flat().reduce((acc, val) => acc + val, 0);
+// console.log(balance);
+
+// There are many sorting algorithms out there, that some of them are complex, but Javascript provides us built-in functions to do sorting to make our life easier. But probably that will not happen when you are working with a low-level language, we would have to implement it from scratch or use others code etcc...
+
+// The sort method is by default designed to work with strings in an alphabetical order. we simply call it on array of strings and it sort them alphabetically
+// NOTE: The 'sort' method mutates the original array, so be careful with using it!
+
+const owners = ['Jonas', 'Zack', 'Martha', 'Ayan'];
+console.log(owners.sort(), owners);
+
+// The 'sort' method unfortunately, is not designed to sort numbers.
+// Though we can pass a callback function to it with two arguments: a and b
+// The first argument is the element with the current iteration (n). and the second argument is (n + 1)
+
+// return > 0 B, A (switch order)
+// return < 0 A, B (keep order)
+
+// This is for sorting in ascending order, for descending we would do the opposite with the comparison operators.
+/*
+movements.sort((a, b) => {
+  if (a > b) return 1;
+  if (a < b) return -1;
+});
+
+/*
+
+// As the 'sort' method mutates the original array so no need to store it in a variable.
+console.log(movements);
+
+// Descending
+/*
+movements.sort((a, b) => {
+  if (a > b) return -1;
+  if (a < b) return 1;
+});
+console.log(movements);
+*/
+
+// Instead of writing this code, we can simply return a value like a - b for ascending, now if a < b then it will be negative and the orders will be  NOT switched, and vice versa (b - a) for descending
+
+// Ascending
+/*
+movements.sort((a, b) => a - b);
+console.log(movements);
+
+// Descending
+movements.sort((a, b) => b - a);
+console.log(movements);
+*/
+
+// In a scenario where an array consists of numbers and strings BOTH, then its not going to work, and in that case don't use the 'sort' method for sorting. And logically there is no point to do so.
