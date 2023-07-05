@@ -549,4 +549,119 @@ console.log(movements);
 // In a scenario where an array consists of numbers and strings BOTH, then its not going to work, and in that case don't use the 'sort' method for sorting. And logically there is no point to do so.
 
 
-// check
+// const frequentChar = function(str) {
+//   let pureStr = str.toLowerCase();
+//   let charFreq = {};
+//   for(let i = 0; i < pureStr.length; i++) {
+//     charFreq[pureStr[i]] = (charFreq[pureStr[i]] || 0) + 1;
+//   };
+//   return Object.keys(charFreq).reduce((acc, key) => charFreq[key] > charFreq[acc] ? key : acc);
+// }
+
+
+// const countTrue = function(arr) {
+//   return arr.filter(bool => bool).length;
+// };
+
+// console.log(countTrue([true, false, false, true, false]));
+
+
+// const whichIsLarger = function(f, g) {
+//   const fReturn = f();
+//   const gReturn = g();
+//   if(fReturn === gReturn) return 'neither';
+//   return fReturn > gReturn ? 'f' : 'g';
+// }
+
+// console.log(whichIsLarger(() => 5, () => 3));
+
+
+// const minMax = function(arr) {
+//   return [Math.min(...arr), Math.max(...arr)];
+// };
+
+// console.log(minMax([1, 2, 3, 4, 5]));
+
+
+// const addUp = function(num) {
+//   const arr = Array.from({length: num}, (_, i) => i + 1);
+//   return arr.reduce((acc, num) => acc + num);
+// }
+
+// console.log(addUp(10));
+
+
+// const getLength = function(arr) {
+//   let count = 0;
+//   function countNonNestedItems(item) {
+//     if(Array.isArray(item)) {
+//       for(let i = 0; i < item.length; i++) {
+//         countNonNestedItems(item[i]);
+//       }
+//     } else count++;
+//   }
+//   countNonNestedItems(arr);
+//   return count;
+// };
+
+
+
+// const canNest = function(arr1, arr2) {
+//   const getMaxMin = (arr) => {
+//     const max = Math.max(...arr);
+//     const min = Math.min(...arr);
+//     return {max, min};
+//   };
+//   const arr1Props = getMaxMin(arr1);
+//   const arr2Props = getMaxMin(arr2);
+//   return arr1Props.min > arr2Props.min && arr1Props.max < arr2Props.max;
+// };
+
+// console.log(canNest([1, 2, 3, 4], [2, 3]));
+
+
+
+// Ways of Creating and Filling Arrays
+
+const arr = [1, 2, 3, 4, 5, 6, 7];
+console.log(arr);
+
+
+// There is another way to also create arrays programatically, like using the Array constructor function
+
+console.log(new Array(7, 2, 3, 4));
+
+
+// When we pass 1 argument then it assumes it as a length of an array and fill it empty.
+
+const newArr = new Array(7);
+console.log(newArr);
+
+// we can use the fill method on it to fill it with some additional arguments like the slice method. NOTE: It mutates the original array
+
+newArr.fill(7);
+console.log(newArr);
+
+newArr.fill(1, 2, 4);
+console.log(newArr);
+
+
+// We can call a method called 'from' from the Array Constructor Function Object. (More about Constructors and possible Questions later! :)
+// The from method receives an object as a first argument and the "length" property is one of them.
+// The second argument is a MAPPING callback function that will be executed in each iteration of the specified length of an array. It also has access to current Element, current Index as an arguments on each iteration. 
+
+
+// Assignment: Generate 100 random dice rolls
+
+// const randomDiceRolls = Array.from({length: 100}, () => Math.trunc(Math.random() * 6) + 1);
+// console.log(randomDiceRolls);
+
+
+
+// Real-world Usecase: Converting a NodeList (Just an array like structure but we cant use methods such as map, filter, reduce etc...) into an Traditional Array
+
+// labelBalance.addEventListener('click', function() {
+//   const movementsUI = Array.from(document.querySelectorAll('.movements__value'),
+//   (el) => Number(el.textContent.replace('€', '')));
+//   console.log(movementsUI);
+// })
