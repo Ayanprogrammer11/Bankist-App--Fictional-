@@ -221,12 +221,12 @@ const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
 /*
 slice: (Mutation: False) This method returns a new sliced array.
- 
+
 splice: This method mutates (changes) the original array and returns the extracted part (like in slice), whereas the original array itself is mutated and the extracted part is gone in the original array
 
 reverse: (Mutation: True) This method reverses an array
 
-concat: (Mutation: False) This method receves one argument to concat the array with 
+concat: (Mutation: False) This method receves one argument to concat the array with
 
 at: The at() method of the array which was introduced in ES2022 does the exact same thing as the bracket notation ([]) to access individual elements in an array.
 */
@@ -362,14 +362,14 @@ console.log(movementsToUsd);
 
 // console.log(movementsToUsdfor);
 
-// const arr = [3, 6, 4, 9, 2, 1]; 
+// const arr = [3, 6, 4, 9, 2, 1];
 
 // const solution = arr.map((_, i) => {
 //   return arr[i] + (i + 1 === arr.length ? null : arr[i + 1]);
 // });
 
 // console.log(solution);
-// 
+//
 
 // const movementsDescription = movements.map(
 //   (mov, i) =>
@@ -547,3 +547,6 @@ console.log(movements);
 */
 
 // In a scenario where an array consists of numbers and strings BOTH, then its not going to work, and in that case don't use the 'sort' method for sorting. And logically there is no point to do so.
+
+
+// check
