@@ -30,6 +30,16 @@ nav {
   padding: 0 2rem;
 }
 
+.btn {
+  background-image: linear-gradient(to bottom right, #ff255b, #a7fa5f);
+  border: none;
+  padding: 1.5rem 3rem;
+  font-size: 1.6rem;
+  border-radius: 2rem;
+  color: #fff;
+  font-weight: 700;
+}
+
 .welcome {
   font-size: 1.9rem;
   font-weight: 500;
@@ -102,7 +112,7 @@ nav {
 .balance {
   grid-column: 1 / span 2;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
 }

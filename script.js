@@ -63,7 +63,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 let user;
-let userMovCopy;
+let currUserMov;
 // Login Functionality
 btnLogin.addEventListener('click', function (e) {
   // Preventing the form from submitting
@@ -77,7 +77,7 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 0;
     return null;
   }
-  userMovCopy = [...user.movements];
+  currUserMov = [...user.movements];
   // Clearing Input Fields, and displaying welcome message
   inputLoginPin.value = '';
   inputLoginUsername.value = '';
@@ -141,17 +141,22 @@ btnClose.addEventListener('click', function (e) {
     inputCloseUsername.value = inputClosePin.value = '';
   }
 });
+let sorted = false;
+btnSort.addEventListener('click', function () {
+  displayMovements(user, !sorted);
+  sorted = !sorted;
+});
 
 const updateUI = function (acc) {
-  displayMovements(acc.movements);
+  displayMovements(acc);
   calcDisplayBalance(acc);
   calcDisplaySummary(acc);
 };
 
-const displayMovements = function (movements) {
+const displayMovements = function ({ movements }, sorted = false) {
   containerMovements.innerHTML = '';
-
-  movements.forEach(function (mov, i) {
+  const movs = sorted ? movements.slice().sort((a, b) => a - b) : movements;
+  movs.forEach(function (mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
     const html = `
     <div class="movements__row">
@@ -498,8 +503,8 @@ console.log(checkSame([5, 5, 5]));
 // The sort method is by default designed to work with strings in an alphabetical order. we simply call it on array of strings and it sort them alphabetically
 // NOTE: The 'sort' method mutates the original array, so be careful with using it!
 
-const owners = ['Jonas', 'Zack', 'Martha', 'Ayan'];
-console.log(owners.sort(), owners);
+// const owners = ['Jonas', 'Zack', 'Martha', 'Ayan'];
+// console.log(owners.sort(), owners);
 
 // The 'sort' method unfortunately, is not designed to sort numbers.
 // Though we can pass a callback function to it with two arguments: a and b
