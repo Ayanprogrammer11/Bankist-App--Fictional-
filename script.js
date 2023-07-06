@@ -623,27 +623,27 @@ console.log(movements);
 
 // Ways of Creating and Filling Arrays
 
-const arr = [1, 2, 3, 4, 5, 6, 7];
-console.log(arr);
+// const arr = [1, 2, 3, 4, 5, 6, 7];
+// console.log(arr);
 
 
-// There is another way to also create arrays programatically, like using the Array constructor function
+// // There is another way to also create arrays programatically, like using the Array constructor function
 
-console.log(new Array(7, 2, 3, 4));
+// console.log(new Array(7, 2, 3, 4));
 
 
-// When we pass 1 argument then it assumes it as a length of an array and fill it empty.
+// // When we pass 1 argument then it assumes it as a length of an array and fill it empty.
 
-const newArr = new Array(7);
-console.log(newArr);
+// const newArr = new Array(7);
+// console.log(newArr);
 
-// we can use the fill method on it to fill it with some additional arguments like the slice method. NOTE: It mutates the original array
+// // we can use the fill method on it to fill it with some additional arguments like the slice method. NOTE: It mutates the original array
 
-newArr.fill(7);
-console.log(newArr);
+// newArr.fill(7);
+// console.log(newArr);
 
-newArr.fill(1, 2, 4);
-console.log(newArr);
+// newArr.fill(1, 2, 4);
+// console.log(newArr);
 
 
 // We can call a method called 'from' from the Array Constructor Function Object. (More about Constructors and possible Questions later! :)
@@ -665,3 +665,113 @@ console.log(newArr);
 //   (el) => Number(el.textContent.replace('€', '')));
 //   console.log(movementsUI);
 // })
+
+
+
+
+
+// Array Methods Practice
+
+// Exercises:
+
+// 1. Summing up all the deposits in all accounts.
+
+const sumDeposits = accounts.flatMap(acc => acc.movements).filter(mov => mov > 0).reduce((acc, num) => acc + num);
+
+console.log(sumDeposits);
+
+// 2. How many deposits are there that are greater than or equal to 1000 all over accounts.
+
+// const numDeposits1000 = accounts.flatMap(mov => mov.movements).filter(mov => mov >= 1000).length;
+
+// An Alternative method.
+// const numDeposits1000 = accounts.flatMap(acc => acc.movements).reduce((count, cur) => (cur >= 1000 ? count + 1 : count), 0);
+
+// const numDeposits1000 = accounts.flatMap(acc => acc.movements).reduce((count, cur) => (cur >= 1000 ? count++ : count), 0); // Output: 0
+
+// Reason: The ++ operator returns the previous value not the incremented value, it done its job and increment it when we log it after operation but it RETURNS the previous value
+
+// let a = 10;
+// console.log(a++); // 10
+// console.log(a); // 11
+
+// FIX: To fix this we can use the ++ operator before the variable  (Prefixed ++ operator) then it will return the incremented value.
+
+
+const numDeposits1000 = accounts.flatMap(acc => acc.movements).reduce((count, cur) => (cur >= 1000 ? ++count : count), 0);
+
+console.log(numDeposits1000);
+
+
+// 3. Using the reduce method more advancely
+
+
+const {deposits, withdrawals} = accounts.flatMap(acc => acc.movements).reduce((sums, cur) => {
+  sums[cur > 0 ? 'deposits' : 'withdrawals'] += cur;
+  return sums;
+}, {deposits: 0, withdrawals: 0});
+
+console.log(deposits, withdrawals);
+
+
+// 4. Converting to Title Case
+
+const convertTitleCase = function(title) {
+  const capitalize = str => str[0].toUpperCase() + str.slice(1);
+  const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with'];
+  const titleCase = title.trim().toLowerCase().split(' ').map(word => (exceptions.includes(word) ? word : capitalize(word))).join(' ');
+  return capitalize(titleCase);
+};
+
+console.log(convertTitleCase('learn how to implement certain microservices and be a master'));
+
+
+// Coding Challenge #4
+
+const dogs = [
+  { weight: 22, curFood: 250, owners: ['Alice','Bob'] },
+  { weight: 8, curFood: 200, owners: ['Matilda'] },
+  { weight: 13, curFood: 275, owners: ['Sarah','John'] },
+  { weight: 32, curFood: 340, owners: ['Michael'] }
+];
+
+// 1. 
+dogs.forEach(dog => dog.recommendedFood = Math.trunc(dog.weight ** 0.75 * 28));
+
+// 2. 
+const sarahDog = dogs.find(dog => dog.owners.includes('Sarah'));
+
+console.log(sarahDog);
+console.log(`Sarah's dog is eating too ${sarahDog.curFood > sarahDog.recommendedFood ? 'much' : 'little'}!`);
+
+
+// 3. 
+const ownersEatTooMuch = dogs.filter(dog => dog.curFood > dog.recommendedFood).flatMap(dog => dog.owners);
+
+
+console.log(ownersEatTooMuch);
+
+const ownersEatTooLittle = dogs.filter(dog => dog.curFood < dog.recommendedFood).flatMap(dog => dog.owners);
+
+console.log(ownersEatTooLittle);
+
+// 4. 
+console.log(`${ownersEatTooMuch.join(' and ')}'s dogs eat too much!`);
+console.log(`${ownersEatTooLittle.join(' and ')}'s dogs eat too little!`);
+
+// 5. 
+console.log(dogs.some(dog => dog.curFood === dog.recommendedFood));
+
+
+// 6. 
+const checkEatingOkay = dog => dog.curFood > dog.recommendedFood * 0.9 && dog.curFood < dog.recommendedFood * 1.1;
+
+console.log(dogs.some(checkEatingOkay));
+
+// 7. 
+console.log(dogs.filter(checkEatingOkay));
+
+// 8. 
+const sortedPortions = [...dogs].sort((a, b) => a.recommendedFood - b.recommendedFood);
+console.log(sortedPortions);
+
